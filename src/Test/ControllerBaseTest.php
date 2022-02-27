@@ -2,7 +2,6 @@
 
 namespace Elkuku\SymfonyUtils\Test;
 
-use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -34,6 +33,8 @@ abstract class ControllerBaseTest extends WebTestCase
             //     'statusCodes' => ['GET' => 500],
             // ],
         ];
+
+    private $usedExceptions = [];
 
     /**
      * Must be set in extending class.
@@ -87,6 +88,8 @@ abstract class ControllerBaseTest extends WebTestCase
 
             $it->next();
         }
+
+        self::assertEquals($this->exceptions, $this->usedExceptions);
     }
 
     /**
@@ -107,6 +110,7 @@ abstract class ControllerBaseTest extends WebTestCase
                 )
             ) {
                 $expectedStatusCodes = $this->exceptions[$routeName]['statusCodes'];
+                $this->usedExceptions[$routeName]['statusCodes'] = $this->exceptions[$routeName]['statusCodes'];
             }
 
             $methods = $route->getMethods();
