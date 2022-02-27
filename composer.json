@@ -1,0 +1,24 @@
+{
+    "name": "elkuku/symfony-utils",
+    "description": "Various Symfony Utilities",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Nikolai Plath",
+            "email": "der.el.kuku@gmail.com"
+        }
+    ],
+    "license": "WTFPL",
+    "autoload": {
+        "psr-4": {
+            "Elkuku\\SymfonyUtils\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.1",
+        "symfony/framework-bundle": "^6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}
