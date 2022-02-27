@@ -18,7 +18,7 @@ class ControllerBaseTest extends WebTestCase
     /**
      * @var array<string, array<string, array<string, int>>>
      */
-    private array $exceptions
+    protected array $exceptions
         = [
             'default' => [
                 'statusCodes' => ['GET' => 200],
