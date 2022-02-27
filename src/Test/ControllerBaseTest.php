@@ -9,11 +9,12 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Controller "smoke" test
  */
-class ControllerBaseTest extends WebTestCase
+abstract class ControllerBaseTest extends WebTestCase
 {
     /**
      * @var array<string, array<string, array<string, int>>>
@@ -26,20 +27,22 @@ class ControllerBaseTest extends WebTestCase
             'login' => [
                 'statusCodes' => ['GET' => 200],
             ],
-            'connect_google_check' => [
-                'statusCodes' => ['GET' => 500],
-            ],
-            'connect_github_check' => [
-                'statusCodes' => ['GET' => 500],
-            ],
+            // 'connect_google_check' => [
+            //     'statusCodes' => ['GET' => 500],
+            // ],
+            // 'connect_github_check' => [
+            //     'statusCodes' => ['GET' => 500],
+            // ],
         ];
 
+    /**
+     * Must be set in extending class.
+     */
     protected string $controllerRoot = '';
 
-    /**
-     * @throws Exception
-     */
-    public function testRoutes(): void
+    abstract public function testRoutes(): void;
+
+    private function runTests(UserInterface $user = null)
     {
         $client = static::createClient();
 
@@ -79,17 +82,18 @@ class ControllerBaseTest extends WebTestCase
                     );
                 $routes = $routeLoader->load($routerClass)->all();
 
-                $this->processRoutes($routes, $client);
+                $this->processRoutes($routes, $client, $user);
             }
 
             $it->next();
         }
+
     }
 
     /**
      * @param array<Route> $routes
      */
-    private function processRoutes(array $routes, KernelBrowser $browser): void
+    private function processRoutes(array $routes, KernelBrowser $browser, UserInterface $user = null): void
     {
         foreach ($routes as $routeName => $route) {
             $defaultId = 1;
@@ -120,6 +124,10 @@ class ControllerBaseTest extends WebTestCase
                     $expectedStatusCode = $expectedStatusCodes[$method];
                 }
 
+                if ($user) {
+                    $browser->loginUser($user);
+                }
+
                 $browser->request($method, $path);
 
                 self::assertEquals(
@@ -135,5 +143,4 @@ class ControllerBaseTest extends WebTestCase
             }
         }
     }
-
 }
