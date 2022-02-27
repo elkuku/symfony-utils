@@ -26,15 +26,12 @@ abstract class ControllerBaseTest extends WebTestCase
             'login'   => [
                 'statusCodes' => ['GET' => 200],
             ],
-            // 'connect_google_check' => [
-            //     'statusCodes' => ['GET' => 500],
-            // ],
-            // 'connect_github_check' => [
-            //     'statusCodes' => ['GET' => 500],
-            // ],
         ];
 
-    private $usedExceptions = [];
+    /**
+     * @var array<string, array<string, array<string, int>>>
+     */
+    private array $usedExceptions = [];
 
     /**
      * Must be set in extending class.
