@@ -24,7 +24,7 @@ abstract class ControllerBaseTest extends WebTestCase
             'default' => [
                 'statusCodes' => ['GET' => 200],
             ],
-            'login' => [
+            'login'   => [
                 'statusCodes' => ['GET' => 200],
             ],
             // 'connect_google_check' => [
@@ -42,7 +42,7 @@ abstract class ControllerBaseTest extends WebTestCase
 
     abstract public function testRoutes(): void;
 
-    private function runTests(UserInterface $user = null)
+    protected function runTests(UserInterface $user = null): void
     {
         $client = static::createClient();
 
@@ -87,14 +87,16 @@ abstract class ControllerBaseTest extends WebTestCase
 
             $it->next();
         }
-
     }
 
     /**
      * @param array<Route> $routes
      */
-    private function processRoutes(array $routes, KernelBrowser $browser, UserInterface $user = null): void
-    {
+    private function processRoutes(
+        array $routes,
+        KernelBrowser $browser,
+        UserInterface $user = null
+    ): void {
         foreach ($routes as $routeName => $route) {
             $defaultId = 1;
             $expectedStatusCodes = [];
