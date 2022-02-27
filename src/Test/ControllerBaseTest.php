@@ -34,6 +34,8 @@ class ControllerBaseTest extends WebTestCase
             ],
         ];
 
+    protected string $controllerRoot = '';
+
     /**
      * @throws Exception
      */
@@ -47,10 +49,14 @@ class ControllerBaseTest extends WebTestCase
         $routeLoader = static::bootKernel()->getContainer()
             ->get('routing.loader');
 
-        $directory = __DIR__.'/../../src/Controller';
+        if (!$this->controllerRoot) {
+            throw new \UnexpectedValueException(
+                'Please set a controllerRoot directory!'
+            );
+        }
 
         $it = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory)
+            new RecursiveDirectoryIterator($this->controllerRoot)
         );
 
         $it->rewind();
