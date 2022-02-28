@@ -21,11 +21,11 @@ abstract class ControllerBaseTest extends WebTestCase
     'Security/GitHubController.php',
     ]
 
-     * @var array<int, string>s
+     * @var array<int, string>
      */
     protected array $ignoredFiles = [];
 
-s    /**
+    /**
      * @var array<string, array<string, array<string, int>>>
      */
     protected array $exceptions = [];
