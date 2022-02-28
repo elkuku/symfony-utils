@@ -15,16 +15,6 @@ use Symfony\Component\Routing\Route;
 abstract class ControllerBaseTest extends WebTestCase
 {
     /**
-     * @var array<string, array<string, array<string, int>>>
-     */
-    protected array $exceptions = [];
-
-    /**
-     * @var array<string, array<string, array<string, int>>>
-     */
-    private array $usedExceptions = [];
-
-    /**
      *                     [
     '.gitignore',
     'Security/GoogleController.php',
@@ -33,7 +23,17 @@ abstract class ControllerBaseTest extends WebTestCase
 
      * @var array<int, string>s
      */
-    private array $ignoredFiles = [];
+    protected array $ignoredFiles = [];
+
+s    /**
+     * @var array<string, array<string, array<string, int>>>
+     */
+    protected array $exceptions = [];
+
+    /**
+     * @var array<string, array<string, array<string, int>>>
+     */
+    private array $usedExceptions = [];
 
     /**
      * Must be set in extending class.
