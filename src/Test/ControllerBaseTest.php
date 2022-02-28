@@ -40,10 +40,8 @@ abstract class ControllerBaseTest extends WebTestCase
 
     abstract public function testRoutes(): void;
 
-    protected function runTests(UserInterface $user = null): void
+    protected function runTests(KernelBrowser $client): void
     {
-        $client = static::createClient();
-
         /**
          * @var DelegatingLoader $routeLoader
          */
@@ -80,7 +78,7 @@ abstract class ControllerBaseTest extends WebTestCase
                     );
                 $routes = $routeLoader->load($routerClass)->all();
 
-                $this->processRoutes($routes, $client, $user);
+                $this->processRoutes($routes, $client);
             }
 
             $it->next();
@@ -95,7 +93,6 @@ abstract class ControllerBaseTest extends WebTestCase
     private function processRoutes(
         array $routes,
         KernelBrowser $browser,
-        UserInterface $user = null
     ): void {
         foreach ($routes as $routeName => $route) {
             $defaultId = 1;
@@ -125,10 +122,6 @@ abstract class ControllerBaseTest extends WebTestCase
                 $expectedStatusCode = 302;
                 if (array_key_exists($method, $expectedStatusCodes)) {
                     $expectedStatusCode = $expectedStatusCodes[$method];
-                }
-
-                if ($user) {
-                    $browser->loginUser($user);
                 }
 
                 $browser->request($method, $path);
