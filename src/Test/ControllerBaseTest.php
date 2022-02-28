@@ -8,7 +8,6 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Controller "smoke" test
@@ -18,20 +17,23 @@ abstract class ControllerBaseTest extends WebTestCase
     /**
      * @var array<string, array<string, array<string, int>>>
      */
-    protected array $exceptions
-        = [
-            'default' => [
-                'statusCodes' => ['GET' => 200],
-            ],
-            'login'   => [
-                'statusCodes' => ['GET' => 200],
-            ],
-        ];
+    protected array $exceptions = [];
 
     /**
      * @var array<string, array<string, array<string, int>>>
      */
     private array $usedExceptions = [];
+
+    /**
+     *                     [
+    '.gitignore',
+    'Security/GoogleController.php',
+    'Security/GitHubController.php',
+    ]
+
+     * @var array<int, string>s
+     */
+    private array $ignoredFiles = [];
 
     /**
      * Must be set in extending class.
@@ -61,14 +63,7 @@ abstract class ControllerBaseTest extends WebTestCase
         $it->rewind();
         while ($it->valid()) {
             if (!$it->isDot()
-                && !in_array(
-                    $it->getSubPathName(),
-                    [
-                        '.gitignore',
-                        'Security/GoogleController.php',
-                        'Security/GitHubController.php',
-                    ]
-                )
+                && !in_array($it->getSubPathName(), $this->ignoredFiles, true)
             ) {
                 $sub = $it->getSubPath() ? $it->getSubPath().'\\' : '';
 
