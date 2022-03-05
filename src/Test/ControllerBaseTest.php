@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\Route;
+use UnexpectedValueException;
 
 /**
  * Controller "smoke" test
@@ -15,11 +16,11 @@ use Symfony\Component\Routing\Route;
 abstract class ControllerBaseTest extends WebTestCase
 {
     /**
-     *                     [
-     * '.gitignore',
-     * 'Security/GoogleController.php',
-     * 'Security/GitHubController.php',
-     * ]
+     * Must be set in extending class.
+     */
+    protected string $controllerRoot = '';
+
+    /**
      * @var array<int, string>
      */
     protected array $ignoredFiles = [];
@@ -30,14 +31,9 @@ abstract class ControllerBaseTest extends WebTestCase
     protected array $exceptions = [];
 
     /**
-     * @var array<string, array<string, array<string, int>>>
+     * @var array<string, array<string, array<string, int|string>>>
      */
     private array $usedExceptions = [];
-
-    /**
-     * Must be set in extending class.
-     */
-    protected string $controllerRoot = '';
 
     abstract public function testRoutes(): void;
 
@@ -50,7 +46,7 @@ abstract class ControllerBaseTest extends WebTestCase
             ->get('routing.loader');
 
         if (!$this->controllerRoot) {
-            throw new \UnexpectedValueException(
+            throw new UnexpectedValueException(
                 'Please set a controllerRoot directory!'
             );
         }
@@ -89,7 +85,6 @@ abstract class ControllerBaseTest extends WebTestCase
         KernelBrowser $browser,
     ): void {
         foreach ($routes as $routeName => $route) {
-            $defaultId = 1;
             $expectedStatusCodes = [];
             $path = str_replace('{id}', '1', $route->getPath());
 
