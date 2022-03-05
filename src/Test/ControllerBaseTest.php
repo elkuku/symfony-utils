@@ -25,7 +25,7 @@ abstract class ControllerBaseTest extends WebTestCase
     protected array $ignoredFiles = [];
 
     /**
-     * @var array<string, array<string, array<string, int>>>
+     * @var array<string, array<string, array<string, int|string>>>
      */
     protected array $exceptions = [];
 
