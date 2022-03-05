@@ -16,11 +16,10 @@ abstract class ControllerBaseTest extends WebTestCase
 {
     /**
      *                     [
-    '.gitignore',
-    'Security/GoogleController.php',
-    'Security/GitHubController.php',
-    ]
-
+     * '.gitignore',
+     * 'Security/GoogleController.php',
+     * 'Security/GitHubController.php',
+     * ]
      * @var array<int, string>
      */
     protected array $ignoredFiles = [];
@@ -92,14 +91,34 @@ abstract class ControllerBaseTest extends WebTestCase
         foreach ($routes as $routeName => $route) {
             $defaultId = 1;
             $expectedStatusCodes = [];
-            if (array_key_exists($routeName, $this->exceptions)
-                && array_key_exists(
+            $path = str_replace('{id}', '1', $route->getPath());
+
+            if (array_key_exists($routeName, $this->exceptions)) {
+                if (array_key_exists(
                     'statusCodes',
                     $this->exceptions[$routeName]
                 )
-            ) {
-                $expectedStatusCodes = $this->exceptions[$routeName]['statusCodes'];
-                $this->usedExceptions[$routeName]['statusCodes'] = $this->exceptions[$routeName]['statusCodes'];
+                ) {
+                    $expectedStatusCodes = $this->exceptions[$routeName]['statusCodes'];
+                    $this->usedExceptions[$routeName]['statusCodes'] = $this->exceptions[$routeName]['statusCodes'];
+                }
+                if (array_key_exists(
+                    'params',
+                    $this->exceptions[$routeName]
+                )
+                ) {
+                    $this->usedExceptions[$routeName]['params'] = $this->exceptions[$routeName]['params'];
+                    foreach (
+                        $this->exceptions[$routeName]['params'] as $param =>
+                        $paramReplacement
+                    ) {
+                        $path = str_replace(
+                            $param,
+                            (string)$paramReplacement,
+                            $path
+                        );
+                    }
+                }
             }
 
             $methods = $route->getMethods();
@@ -112,12 +131,11 @@ abstract class ControllerBaseTest extends WebTestCase
                 $methods = ['GET'];
             }
 
-            $path = str_replace('{id}', (string)$defaultId, $route->getPath());
             foreach ($methods as $method) {
-                $expectedStatusCode = 302;
-                if (array_key_exists($method, $expectedStatusCodes)) {
-                    $expectedStatusCode = $expectedStatusCodes[$method];
-                }
+                $expectedStatusCode = array_key_exists(
+                    $method,
+                    $expectedStatusCodes
+                ) ? $expectedStatusCodes[$method] : 302;
 
                 $browser->request($method, $path);
 
