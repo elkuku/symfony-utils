@@ -29,6 +29,7 @@ class UserAdminCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ServiceEntityRepository $userRepository,
+        private readonly array $userRoles,
         /**
          * @var UserInterface $userFQCN
          */
@@ -147,7 +148,7 @@ class UserAdminCommand extends Command
             $this->output,
             (new ChoiceQuestion(
                 'User role',
-                array_values(User::ROLES)
+                array_values($this->userRoles)
             ))
                 ->setErrorMessage('Choice %s is invalid.')
         );
