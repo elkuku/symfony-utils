@@ -200,6 +200,9 @@ class UserAdminCommand extends Command
 
         $user->setIdentifier($this->askIdentifier($user->getUserIdentifier()));
         $user->setRoles([$this->askRole($user->getRoles())]);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
     }
 
     private function deleteUser(): void
