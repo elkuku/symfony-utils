@@ -129,10 +129,11 @@ class UserAdminCommand extends Command
     {
         $io = new SymfonyStyle($this->input, $this->output);
         do {
+            $questionText = sprintf('Identifier%s: ', $default ? " ($default)" : '');
             $identifier = $this->getHelper('question')->ask(
                 $this->input,
                 $this->output,
-                new Question('Identifier: ', $default)
+                new Question($questionText, $default)
             );
             if (!$identifier) {
                 $io->warning('Identifier required :(');
@@ -148,11 +149,12 @@ class UserAdminCommand extends Command
     private function askRole(array $default = []): mixed
     {
         $defaultRole = $default ? $default[0] : 'ROLE_USER';
+        $questionText = sprintf('User role%s: ', " ($defaultRole)");
         return $this->getHelper('question')->ask(
             $this->input,
             $this->output,
             (new ChoiceQuestion(
-                'User role',
+                $questionText,
                 array_values($this->userRoles),
                 $defaultRole
             ))
