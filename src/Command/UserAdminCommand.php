@@ -4,6 +4,7 @@ namespace Elkuku\SymfonyUtils\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Elkuku\SymfonyUtils\Type\ExpectedUserType;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -30,9 +31,12 @@ class UserAdminCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ServiceEntityRepository $userRepository,
+        /**
+         * @var array<string>
+         */
         private readonly array $userRoles,
         /**
-         * @var UserInterface $userFQCN
+         * @var class-string<ExpectedUserType>
          */
         private readonly string $userFQCN = '\\App\\Entity\\User',
     ) {
@@ -179,7 +183,7 @@ class UserAdminCommand extends Command
             )
         );
 
-        /* @type User $user */
+        /* @type ExpectedUserType $user */
         foreach ($users as $user) {
             $table->addRow(
                 [
@@ -194,8 +198,11 @@ class UserAdminCommand extends Command
         $table->render();
     }
 
-    private function editUser()
+    private function editUser(): void
     {
+        /**
+         * @var \Elkuku\SymfonyUtils\Type\ExpectedUserType $user
+         */
         $user = $this->findUser();
 
         $user->setIdentifier($this->askIdentifier($user->getUserIdentifier()));
@@ -218,12 +225,10 @@ class UserAdminCommand extends Command
         $id = $this->getHelper('question')->ask(
             $this->input,
             $this->output,
-            new Question('User ID to delete: ')
+            new Question('User ID: ')
         );
-        $user = $this->userRepository
-            ->findOneBy(
-                ['id' => $id]
-            );
+
+        $user = $this->userRepository->findOneBy(['id' => $id]);
 
         if (!$user) {
             throw new UnexpectedValueException('User not found!');
