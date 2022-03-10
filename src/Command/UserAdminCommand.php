@@ -4,6 +4,7 @@ namespace Elkuku\SymfonyUtils\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -124,14 +125,14 @@ class UserAdminCommand extends Command
         $this->entityManager->flush();
     }
 
-    private function askIdentifier(): string
+    private function askIdentifier(string $default = ''): string
     {
         $io = new SymfonyStyle($this->input, $this->output);
         do {
             $identifier = $this->getHelper('question')->ask(
                 $this->input,
                 $this->output,
-                new Question('Identifier: ')
+                new Question('Identifier: ', $default)
             );
             if (!$identifier) {
                 $io->warning('Identifier required :(');
@@ -141,14 +142,15 @@ class UserAdminCommand extends Command
         return $identifier;
     }
 
-    private function askRole(): mixed
+    private function askRole(string $default = ''): mixed
     {
         return $this->getHelper('question')->ask(
             $this->input,
             $this->output,
             (new ChoiceQuestion(
                 'User role',
-                array_values($this->userRoles)
+                array_values($this->userRoles),
+                $default
             ))
                 ->setErrorMessage('Choice %s is invalid.')
         );
@@ -186,7 +188,20 @@ class UserAdminCommand extends Command
         $table->render();
     }
 
+    private function editUser()
+    {
+        $user = $this->findUser();
+    }
+
     private function deleteUser(): void
+    {
+        $user = $this->findUser();
+
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
+    }
+
+    private function findUser(): UserInterface
     {
         $id = $this->getHelper('question')->ask(
             $this->input,
@@ -202,7 +217,6 @@ class UserAdminCommand extends Command
             throw new UnexpectedValueException('User not found!');
         }
 
-        $this->entityManager->remove($user);
-        $this->entityManager->flush();
+        return $user;
     }
 }
