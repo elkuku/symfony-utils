@@ -22,7 +22,7 @@ use UnexpectedValueException;
     description: 'Administer user accounts',
     aliases: ['useradmin', 'admin']
 )]
-class UserAdminCommand extends Command
+class UserAdminBaseCommand extends Command
 {
     private InputInterface $input;
     private OutputInterface $output;
