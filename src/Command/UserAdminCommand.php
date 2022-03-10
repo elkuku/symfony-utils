@@ -142,15 +142,19 @@ class UserAdminCommand extends Command
         return $identifier;
     }
 
-    private function askRole(string $default = ''): mixed
+    /**
+     * @param array<string> $default
+     */
+    private function askRole(array $default = []): mixed
     {
+        $defaultRole = $default ? $default[0] : 'ROLE_USER';
         return $this->getHelper('question')->ask(
             $this->input,
             $this->output,
             (new ChoiceQuestion(
                 'User role',
                 array_values($this->userRoles),
-                $default
+                $defaultRole
             ))
                 ->setErrorMessage('Choice %s is invalid.')
         );
@@ -191,6 +195,9 @@ class UserAdminCommand extends Command
     private function editUser()
     {
         $user = $this->findUser();
+
+        $user->setIdentifier($this->askIdentifier($user->getUserIdentifier()));
+        $user->setRoles([$this->askRole($user->getRoles())]);
     }
 
     private function deleteUser(): void
