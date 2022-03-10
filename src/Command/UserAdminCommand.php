@@ -71,7 +71,7 @@ class UserAdminCommand extends Command
                     $this->renderUsersTable();
                     break;
                 case 'Update User':
-                    $this->io->warning('Update is not implemented yet :(');
+                    $this->editUser();
                     break;
                 case 'Delete User':
                     $this->deleteUser();
