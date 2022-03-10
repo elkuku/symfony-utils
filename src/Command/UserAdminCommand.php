@@ -12,6 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Security\Core\User\UserInterface;
 use UnexpectedValueException;
 
 #[AsCommand(
@@ -28,6 +29,9 @@ class UserAdminCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ServiceEntityRepository $userRepository,
+        /**
+         * @var UserInterface $userFQCN
+         */
         private readonly string $userFQCN = '\\App\\Entity\\User',
     ) {
         parent::__construct();
@@ -111,7 +115,7 @@ class UserAdminCommand extends Command
 
     private function createUser(): void
     {
-        $user = (new $this->userFQCNFQ)
+        $user = (new $this->userFQCN)
             ->setIdentifier($this->askIdentifier())
             ->setRoles([$this->askRole()]);
 
@@ -156,7 +160,7 @@ class UserAdminCommand extends Command
             ['ID', 'Identifier', 'Roles', 'GoogleId', 'GitHubId']
         );
 
-        $users = $this->entityManager->getRepository(User::class)
+        $users = $this->userRepository
             ->findBy([], ['id' => 'ASC']);
 
         $this->io->text(
@@ -188,8 +192,7 @@ class UserAdminCommand extends Command
             $this->output,
             new Question('User ID to delete: ')
         );
-        $user = $this->entityManager
-            ->getRepository(User::class)
+        $user = $this->userRepository
             ->findOneBy(
                 ['id' => $id]
             );
