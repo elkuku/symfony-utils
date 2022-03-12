@@ -6,6 +6,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class ExpectedUserType implements UserInterface
 {
+    private ?int $id = null;
     private string $identifier;
 
     /**
@@ -43,5 +44,10 @@ class ExpectedUserType implements UserInterface
 
     public function eraseCredentials(): void
     {
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 }
