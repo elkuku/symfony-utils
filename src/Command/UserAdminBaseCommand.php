@@ -4,6 +4,7 @@ namespace Elkuku\SymfonyUtils\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Elkuku\SymfonyUtils\Type\ExpectedUserRepository;
 use Elkuku\SymfonyUtils\Type\ExpectedUserType;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -30,6 +31,9 @@ class UserAdminBaseCommand extends Command
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        /**
+         * @var ExpectedUserRepository
+         */
         private readonly ServiceEntityRepository $userRepository,
         /**
          * @var array<string>
@@ -133,7 +137,10 @@ class UserAdminBaseCommand extends Command
     {
         $io = new SymfonyStyle($this->input, $this->output);
         do {
-            $questionText = sprintf('Identifier%s: ', $default ? " ($default)" : '');
+            $questionText = sprintf(
+                'Identifier%s: ',
+                $default ? " ($default)" : ''
+            );
             $identifier = $this->getHelper('question')->ask(
                 $this->input,
                 $this->output,
@@ -154,6 +161,7 @@ class UserAdminBaseCommand extends Command
     {
         $defaultRole = $default ? $default[0] : 'ROLE_USER';
         $questionText = sprintf('User role%s: ', " ($defaultRole)");
+
         return $this->getHelper('question')->ask(
             $this->input,
             $this->output,
@@ -185,13 +193,17 @@ class UserAdminBaseCommand extends Command
 
         /* @type ExpectedUserType $user */
         foreach ($users as $user) {
+            $gitHubId = method_exists($user, 'getGitHubId')
+                ? $user->getGitHubId() : 'n/a';
+            $googleId = method_exists($user, 'getGoogleId')
+                ? $user->getGoogleId() : 'n/a';
             $table->addRow(
                 [
                     $user->getId(),
                     $user->getUserIdentifier(),
                     implode(', ', $user->getRoles()),
-                    $user->getGoogleId(),
-                    $user->getGitHubId(),
+                    $googleId,
+                    $gitHubId,
                 ]
             );
         }
