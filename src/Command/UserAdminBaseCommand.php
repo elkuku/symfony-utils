@@ -32,7 +32,7 @@ class UserAdminBaseCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         /**
-         * @var ServiceEntityRepository<ExpectedUserRepository>
+         * @var ServiceEntityRepository
          */
         private readonly ServiceEntityRepository $userRepository,
         /**
