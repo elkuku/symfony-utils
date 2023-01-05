@@ -4,7 +4,6 @@ namespace Elkuku\SymfonyUtils\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Elkuku\SymfonyUtils\Type\ExpectedUserRepository;
 use Elkuku\SymfonyUtils\Type\ExpectedUserType;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -191,7 +190,7 @@ class UserAdminBaseCommand extends Command
             )
         );
 
-        /* @type ExpectedUserType $user */
+        /** @var ExpectedUserType[] $users */
         foreach ($users as $user) {
             $gitHubId = method_exists($user, 'getGitHubId')
                 ? $user->getGitHubId() : 'n/a';
