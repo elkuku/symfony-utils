@@ -28,28 +28,25 @@ class UserAdminBaseCommand extends Command
     private OutputInterface $output;
     private SymfonyStyle $io;
 
+    /**
+     * @var array<string> $userRoles
+     * @var class-string<ExpectedUserType> $userFQCN
+     */
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        /**
-         * @var ServiceEntityRepository
-         */
+        private readonly EntityManagerInterface  $entityManager,
         private readonly ServiceEntityRepository $userRepository,
-        /**
-         * @var array<string>
-         */
-        private readonly array $userRoles,
-        /**
-         * @var class-string<ExpectedUserType>
-         */
-        private readonly string $userFQCN = '\\App\\Entity\\User',
-    ) {
+        private readonly array                   $userRoles,
+        private readonly string                  $userFQCN = '\\App\\Entity\\User',
+    )
+    {
         parent::__construct();
     }
 
     protected function execute(
-        InputInterface $input,
+        InputInterface  $input,
         OutputInterface $output
-    ): int {
+    ): int
+    {
         $this->input = $input;
         $this->output = $output;
         $this->io = new SymfonyStyle($input, $output);
@@ -90,7 +87,7 @@ class UserAdminBaseCommand extends Command
                     return Command::FAILURE;
                 default:
                     throw new UnexpectedValueException(
-                        'Unknown answer: '.$answer
+                        'Unknown answer: ' . $answer
                     );
             }
         } catch (Exception $exception) {

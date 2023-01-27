@@ -14,5 +14,4 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  */
 class ExpectedUserRepository extends ServiceEntityRepository
 {
-
 }

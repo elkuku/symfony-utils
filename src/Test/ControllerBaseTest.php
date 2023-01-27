@@ -60,9 +60,9 @@ abstract class ControllerBaseTest extends WebTestCase
             if (!$it->isDot()
                 && !in_array($it->getSubPathName(), $this->ignoredFiles, true)
             ) {
-                $sub = $it->getSubPath() ? $it->getSubPath().'\\' : '';
+                $sub = $it->getSubPath() ? $it->getSubPath() . '\\' : '';
 
-                $routerClass = 'App\Controller\\'.$sub.basename(
+                $routerClass = 'App\Controller\\' . $sub . basename(
                         $it->key(),
                         '.php'
                     );
@@ -81,9 +81,10 @@ abstract class ControllerBaseTest extends WebTestCase
      * @param array<Route> $routes
      */
     private function processRoutes(
-        array $routes,
+        array         $routes,
         KernelBrowser $browser,
-    ): void {
+    ): void
+    {
         foreach ($routes as $routeName => $route) {
             $expectedStatusCodes = [];
             $path = str_replace('{id}', '1', $route->getPath());
@@ -122,7 +123,7 @@ abstract class ControllerBaseTest extends WebTestCase
                 echo sprintf(
                         'No methods set in controller "%s"',
                         $route->getPath()
-                    ).PHP_EOL;
+                    ) . PHP_EOL;
                 $methods = ['GET'];
             }
 
