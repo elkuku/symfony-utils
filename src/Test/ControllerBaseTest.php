@@ -35,7 +35,7 @@ abstract class ControllerBaseTest extends WebTestCase
      */
     private array $usedExceptions = [];
 
-    abstract public function testRoutes(): void;
+    abstract public function testAllRoutesAreProtected(): void;
 
     protected function runTests(KernelBrowser $client): void
     {
