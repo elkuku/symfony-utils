@@ -2,17 +2,13 @@
 
 namespace Elkuku\SymfonyUtils\Type;
 
+use App\Enum\UserRole;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ExpectedUserType implements UserInterface
 {
     private ?int $id = null;
     private string $identifier;
-
-    /**
-     * @var array<string>
-     */
-    private array $roles;
 
     public function getUserIdentifier(): string
     {
@@ -31,15 +27,16 @@ class ExpectedUserType implements UserInterface
         return $this->roles;
     }
 
-
-    /**
-     * @param array<string> $roles
-     */
-    public function setRoles(array $roles): ExpectedUserType
+    public function setRole(UserRole $role): ExpectedUserType
     {
-        $this->roles = $roles;
+        $this->role = $role;
 
         return $this;
+    }
+
+    public function getRole(): UserRole
+    {
+        return $this->role;
     }
 
     public function eraseCredentials(): void

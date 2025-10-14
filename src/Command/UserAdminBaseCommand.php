@@ -22,7 +22,7 @@ use UnexpectedValueException;
     description: 'Administer user accounts',
     aliases: ['useradmin', 'admin']
 )]
-class UserAdminBaseCommand extends Command
+abstract class UserAdminBaseCommand extends Command
 {
     private InputInterface $input;
     private OutputInterface $output;
@@ -33,17 +33,16 @@ class UserAdminBaseCommand extends Command
      * @var class-string<ExpectedUserType> $userFQCN
      */
     public function __construct(
-        private readonly EntityManagerInterface  $entityManager,
+        private readonly EntityManagerInterface $entityManager,
         private readonly ServiceEntityRepository $userRepository,
-        private readonly array                   $userRoles,
-        private readonly string                  $userFQCN = '\\App\\Entity\\User',
+        private readonly string $userFQCN = '\\App\\Entity\\User',
     )
     {
         parent::__construct();
     }
 
     protected function execute(
-        InputInterface  $input,
+        InputInterface $input,
         OutputInterface $output
     ): int
     {
@@ -87,7 +86,7 @@ class UserAdminBaseCommand extends Command
                     return Command::FAILURE;
                 default:
                     throw new UnexpectedValueException(
-                        'Unknown answer: ' . $answer
+                        'Unknown answer: '.$answer
                     );
             }
         } catch (Exception $exception) {
@@ -122,8 +121,9 @@ class UserAdminBaseCommand extends Command
     private function createUser(): void
     {
         $user = (new $this->userFQCN)
-            ->setIdentifier($this->askIdentifier())
-            ->setRoles([$this->askRole()]);
+            ->setIdentifier($this->askIdentifier());
+
+        $user = $this->setRole($user, $this->askRole());
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
@@ -131,21 +131,22 @@ class UserAdminBaseCommand extends Command
 
     private function askIdentifier(string $default = ''): string
     {
-        $io = new SymfonyStyle($this->input, $this->output);
+        $questionText = sprintf(
+            'Identifier%s: ',
+            $default ? " ($default)" : ''
+        );
+
         do {
-            $questionText = sprintf(
-                'Identifier%s: ',
-                $default ? " ($default)" : ''
-            );
             $identifier = $this->getHelper('question')->ask(
                 $this->input,
                 $this->output,
                 new Question($questionText, $default)
             );
+
             if (!$identifier) {
-                $io->warning('Identifier required :(');
+                $this->io->warning('An identifier is required :(');
             }
-        } while ($identifier === null);
+        } while ($identifier === null || $identifier === '');
 
         return $identifier;
     }
@@ -155,15 +156,21 @@ class UserAdminBaseCommand extends Command
      */
     private function askRole(array $default = []): mixed
     {
-        $defaultRole = $default ? $default[0] : 'ROLE_USER';
+        $roles = $this->getRoles();
+        $defaultRole = $default ? $default[0] : $roles[0]->value;
         $questionText = sprintf('User role%s: ', " ($defaultRole)");
+
+        $choices = [];
+        foreach ($roles as $role) {
+            $choices[] = $role->value;
+        }
 
         return $this->getHelper('question')->ask(
             $this->input,
             $this->output,
             (new ChoiceQuestion(
                 $questionText,
-                array_values($this->userRoles),
+                $choices,
                 $defaultRole
             ))
                 ->setErrorMessage('Choice %s is invalid.')
@@ -214,7 +221,7 @@ class UserAdminBaseCommand extends Command
         $user = $this->findUser();
 
         $user->setIdentifier($this->askIdentifier($user->getUserIdentifier()));
-        $user->setRoles([$this->askRole($user->getRoles())]);
+        $this->setRole($user, $this->askRole($user->getRoles()));
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
@@ -243,5 +250,18 @@ class UserAdminBaseCommand extends Command
         }
 
         return $user;
+    }
+
+    /**
+     * @return array<\BackedEnum>
+     */
+    protected function getRoles(): array
+    {
+        throw new \RuntimeException('You have to implement the \'getRoles()\' method in the extended class.');
+    }
+
+    protected function setRole(UserInterface $user, string $role): UserInterface
+    {
+        throw new \RuntimeException('You have to implement the \'setRole()\' method in the extended class.');
     }
 }
