@@ -200,9 +200,12 @@ abstract class UserAdminBaseCommand extends Command
                 ? $user->getGitHubId() : 'n/a';
             $googleId = method_exists($user, 'getGoogleId')
                 ? $user->getGoogleId() : 'n/a';
+            // Entities with a public (hooked) $id property have no getId()
+            $id = method_exists($user, 'getId')
+                ? $user->getId() : $user->id;
             $table->addRow(
                 [
-                    $user->getId(),
+                    $id,
                     $user->getUserIdentifier(),
                     implode(', ', $user->getRoles()),
                     $googleId,
