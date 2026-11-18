@@ -50,3 +50,20 @@ function executedMigrations {
   symfony console doctrine:migrations:status 2>/dev/null \
     | awk -F'|' '{ gsub(/^ +| +$/, "", $3); gsub(/ /, "", $4) } $3 == "Executed" { print $4 }'
 }
+
+# Waits until the database server accepts connections (up to 30 seconds) and creates the
+# database if it doesn't exist yet. Needed when the Docker service has no healthcheck.
+function waitForDatabase {
+  printf "Waiting for the database "
+  for _ in $(seq 1 30); do
+    if symfony console doctrine:database:create --if-not-exists &> /dev/null; then
+      echo " ✅"
+      return 0
+    fi
+    printf "."
+    sleep 1
+  done
+  echo " ❌"
+  echo "❌ ERROR: The database is not reachable. Check: symfony console doctrine:database:create --if-not-exists"
+  exit 1
+}

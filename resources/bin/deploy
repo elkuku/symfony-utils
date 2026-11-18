@@ -4,9 +4,12 @@
 #
 # Installed by the elkuku/symfony-utils Flex recipe.
 #
-# Uses "php" and "composer" from the PATH. Override them for hosts with several PHP versions, e.g. Plesk:
-#   PHP_BIN=/opt/plesk/php/8.5/bin/php COMPOSER_BIN=/usr/lib/plesk-9.0/composer.phar bin/deploy
-# (Don't use COMPOSER for this: Composer reads that variable as the name of the composer.json file.)
+# Uses "php" and "composer" from the PATH. For hosts with several PHP versions, e.g. Plesk,
+# put the paths into bin/deploy.env (committed in the project, never touched by the recipe):
+#   PHP_BIN=/opt/plesk/php/8.5/bin/php
+#   COMPOSER_BIN=/usr/lib/plesk-9.0/composer.phar
+# or set them as environment variables. (Don't use COMPOSER for this: Composer reads that
+# variable as the name of the composer.json file.)
 #
 # License: WTFPL
 # Author: Nikolai Plath
@@ -14,6 +17,12 @@
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && cd .. && pwd)"
 cd "$DIR" || exit 1
+
+# Project-specific settings, see above.
+if [ -f bin/deploy.env ]; then
+  # shellcheck source=/dev/null
+  . bin/deploy.env
+fi
 
 # Composer's post-install scripts (cache:clear) and the console must run in prod:
 # the dev-only bundles are gone after "composer install --no-dev".

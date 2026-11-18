@@ -14,7 +14,19 @@ A [Symfony Flex](https://symfony.com/doc/current/setup/flex.html) recipe copies 
 | `bin/functions.sh` | Helpers used by the scripts above                                                                                                                        |
 
 Each step is skipped when the project doesn't use it (no `compose.yaml`, no Doctrine migrations, no fixtures).
+Before migrating, `bin/install` waits up to 30 seconds for the database, so the Docker database service doesn't need a healthcheck.
 Fixtures are only loaded when no migration had been run before, because loading them purges the database.
+
+### Server-specific deploy settings
+
+`bin/deploy` uses `php` and `composer` from the `PATH`. If the server needs other binaries (e.g. Plesk with several PHP versions), put them into `bin/deploy.env` in your project. The recipe never touches that file:
+
+```shell
+PHP_BIN=/opt/plesk/php/8.5/bin/php
+COMPOSER_BIN=/usr/lib/plesk-9.0/composer.phar
+```
+
+### Requirements
 
 The local scripts need the [Symfony CLI](https://symfony.com/download), and Docker with Compose v2 (`docker compose`) if the project has a Compose file. `bin/deploy` only needs PHP and Composer.
 
