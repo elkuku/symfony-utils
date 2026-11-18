@@ -2,6 +2,7 @@
 
 - **Dev environment scripts** for `bin/`, installed by a Flex recipe (see below).
 - **`UserAdminBaseCommand`**: an interactive `user-admin` console command. Extend it and implement `getRoles()` and `setRole()`.
+  If your user entity has more required fields, override `fillNewUser()` to ask for them when a user is created.
   Needs `symfony/console`, `symfony/security-core`, `doctrine/orm` and `doctrine/doctrine-bundle`.
 - **`ControllerBaseTest`**: a smoke test that requests every route of your controllers and checks the status codes.
   Needs `symfony/framework-bundle` and `symfony/browser-kit`.

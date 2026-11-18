@@ -19,6 +19,8 @@ class TestUser implements UserInterface
 
     private ?int $gitHubId = null;
 
+    private string $name = '';
+
     public function getUserIdentifier(): string
     {
         return '' !== $this->identifier ? $this->identifier : 'unnamed';
@@ -56,6 +58,18 @@ class TestUser implements UserInterface
     public function setGitHubId(?int $gitHubId): self
     {
         $this->gitHubId = $gitHubId;
+
+        return $this;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
 
         return $this;
     }

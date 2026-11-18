@@ -11,7 +11,9 @@ use Elkuku\SymfonyUtils\Tests\Fixtures\TestUser;
 use Elkuku\SymfonyUtils\Tests\Fixtures\TestUserAdminCommand;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserAdminBaseCommandTest extends TestCase
 {
@@ -39,6 +41,44 @@ class UserAdminBaseCommandTest extends TestCase
 
         self::assertSame(Command::SUCCESS, $tester->execute([]));
         self::assertStringContainsString('User created', $tester->getDisplay());
+    }
+
+    public function testFillNewUserAsksForMoreFields(): void
+    {
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->expects(self::once())->method('persist')->with(self::callback(
+            static fn (object $user): bool => $user instanceof TestUser
+                && 'alice' === $user->getUserIdentifier()
+                && 'Alice Liddell' === $user->getName()
+        ));
+
+        $command = new class($entityManager, $this->createStub(ServiceEntityRepository::class)) extends TestUserAdminCommand {
+            protected function fillNewUser(UserInterface $user, SymfonyStyle $io): UserInterface
+            {
+                \assert($user instanceof TestUser);
+
+                return $user->setName((string) $io->ask('Name'));
+            }
+        };
+
+        $tester = new CommandTester($command);
+        $tester->setInputs(['Create User', 'alice', 'ROLE_USER', 'Alice Liddell', 'Exit']);
+
+        self::assertSame(Command::SUCCESS, $tester->execute([]));
+        self::assertStringContainsString('User created', $tester->getDisplay());
+    }
+
+    public function testPromptsShowEachColonOnce(): void
+    {
+        $tester = $this->createTester($this->createStub(EntityManagerInterface::class));
+        $tester->setInputs(['Create User', 'alice', 'ROLE_USER', 'Exit']);
+        $tester->execute([]);
+
+        $display = $tester->getDisplay();
+        self::assertStringContainsString('Identifier:', $display);
+        self::assertStringContainsString('User role [ROLE_USER]:', $display);
+        self::assertStringNotContainsString(': :', $display);
+        self::assertStringNotContainsString('):', $display);
     }
 
     public function testReadUsers(): void

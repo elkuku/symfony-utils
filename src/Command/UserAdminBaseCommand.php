@@ -21,6 +21,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * The user class must implement UserInterface, have a setIdentifier(string) method, and expose
  * its ID through getId() or a public $id property. getGoogleId()/getGitHubId() are shown if present.
+ * If the entity has more required fields, override fillNewUser() to ask for them.
  */
 #[AsCommand(
     name: 'user-admin',
@@ -75,13 +76,22 @@ abstract class UserAdminBaseCommand extends Command
     }
 
     /**
+     * Called for a new user after its identifier and role are set, before it is saved.
+     * Override it to ask for, or set, the other fields your user entity requires.
+     */
+    protected function fillNewUser(UserInterface $user, SymfonyStyle $io): UserInterface
+    {
+        return $user;
+    }
+
+    /**
      * @return bool false when the user chose to exit
      */
     private function showMenu(): bool
     {
         $answer = $this->ask(
             (new ChoiceQuestion(
-                'Please select an option (defaults to exit)',
+                'Please select an option',
                 [self::EXIT, self::CREATE, self::READ, self::UPDATE, self::DELETE],
                 0
             ))->setErrorMessage('Choice %s is invalid.')
@@ -129,6 +139,7 @@ abstract class UserAdminBaseCommand extends Command
         $user = new $userClass();
         $this->setIdentifier($user, $this->askIdentifier());
         $user = $this->setRole($user, $this->askRole());
+        $user = $this->fillNewUser($user, $this->io);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
@@ -180,10 +191,8 @@ abstract class UserAdminBaseCommand extends Command
 
     private function askIdentifier(string $default = ''): string
     {
-        $questionText = \sprintf('Identifier%s: ', '' !== $default ? " ($default)" : '');
-
         do {
-            $identifier = $this->ask(new Question($questionText, '' !== $default ? $default : null));
+            $identifier = $this->ask(new Question('Identifier', '' !== $default ? $default : null));
 
             if ('' === $identifier) {
                 $this->io->warning('An identifier is required :(');
@@ -207,7 +216,7 @@ abstract class UserAdminBaseCommand extends Command
         $defaultRole = $default[0] ?? $choices[0];
 
         return $this->ask(
-            (new ChoiceQuestion(\sprintf('User role (%s): ', $defaultRole), $choices, $defaultRole))
+            (new ChoiceQuestion('User role', $choices, $defaultRole))
                 ->setErrorMessage('Choice %s is invalid.')
         );
     }
