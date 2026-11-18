@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Stop script: Symfony server and Docker services.
+#
+# Installed by the elkuku/symfony-utils Flex recipe.
+#
+# License: WTFPL
+# Author: Nikolai Plath
+#
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && cd .. && pwd)"
+cd "$DIR" || exit 1
+
+. ./bin/functions.sh
+
+checkIsInstalled symfony
+
+echo "⭕️ Stopping dev env in $DIR ..."
+
+symfony server:stop
+
+if hasComposeFile; then
+  checkDockerCompose
+  docker compose stop
+fi
+
+echo "✨  bye =;) 🤪"

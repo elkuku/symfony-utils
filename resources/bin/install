@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# Install script: dependencies, Docker services, database, fixtures, server.
+#
+# Installed by the elkuku/symfony-utils Flex recipe.
+#
+# License: WTFPL
+# Author: Nikolai Plath
+#
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && cd .. && pwd)"
+cd "$DIR" || exit 1
+
+. ./bin/functions.sh
+
+checkIsInstalled composer
+checkIsInstalled symfony
+
+echo "🚀 Setting up dev env in $DIR ..."
+
+composer install || exit 1
+
+startServices
+
+if hasConsoleCommand doctrine:migrations; then
+  # Loading fixtures purges the database, so only do it when no migration had run before.
+  EXECUTED_BEFORE=$(executedMigrations)
+
+  symfony console doctrine:migrations:migrate -n --allow-no-migration || exit 1
+
+  if hasConsoleCommand doctrine:fixtures; then
+    if [ "$EXECUTED_BEFORE" = "0" ]; then
+      echo "Fresh database, loading fixtures ..."
+      symfony console doctrine:fixtures:load -n || exit 1
+    elif [ -z "$EXECUTED_BEFORE" ]; then
+      echo "⚠️  Could not check the database state, skipping fixtures. Load them with: symfony console doctrine:fixtures:load"
+    else
+      echo "Database already set up, skipping fixtures."
+    fi
+  fi
+fi
+
+symfony server:start -d
+
+symfony open:local
+
+echo "✨  hF =;) 🤪"
