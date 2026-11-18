@@ -11,6 +11,8 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && cd .. && pwd)"
 cd "$DIR" || exit 1
 
+# In a project, functions.sh sits next to this script in bin/.
+# shellcheck source=functions.sh
 . ./bin/functions.sh
 
 checkIsInstalled symfony

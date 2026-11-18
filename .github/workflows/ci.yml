@@ -1,0 +1,75 @@
+name: CI
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    checks:
+        name: PHPStan, PHP CS Fixer, PHPUnit
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+              with:
+                  php-version: '8.5'
+                  coverage: none
+
+            - name: Install dependencies
+              uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
+              with:
+                  require-lock-file: true
+
+            - name: Validate composer.json
+              run: composer validate --strict --no-check-publish
+
+            - name: PHPStan
+              run: vendor/bin/phpstan analyse --no-progress
+
+            - name: PHP CS Fixer
+              run: vendor/bin/php-cs-fixer check --diff --using-cache=no
+
+            - name: PHPUnit
+              run: vendor/bin/phpunit
+
+    lowest-php:
+        # The package supports PHP 8.1; the dev tools need a newer PHP, so only lint here.
+        name: PHP 8.1 syntax
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+              with:
+                  php-version: '8.1'
+                  coverage: none
+
+            - name: Lint src/
+              run: find src -name '*.php' -print0 | xargs -0 -n1 php -l
+
+    shellcheck:
+        name: ShellCheck
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Check the bin scripts
+              run: shellcheck -x -P SCRIPTDIR resources/bin/install resources/bin/start resources/bin/stop resources/bin/deploy resources/bin/functions.sh

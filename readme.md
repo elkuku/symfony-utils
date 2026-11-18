@@ -1,5 +1,14 @@
 # Symfony Utilities
 
+- **Dev environment scripts** for `bin/`, installed by a Flex recipe (see below).
+- **`UserAdminBaseCommand`**: an interactive `user-admin` console command. Extend it and implement `getRoles()` and `setRole()`.
+  Needs `symfony/console`, `symfony/security-core`, `doctrine/orm` and `doctrine/doctrine-bundle`.
+- **`ControllerBaseTest`**: a smoke test that requests every route of your controllers and checks the status codes.
+  Needs `symfony/framework-bundle` and `symfony/browser-kit`.
+
+The package itself only requires PHP. The packages the two classes need are suggested, not required,
+so a project that only wants the scripts doesn't get Doctrine installed.
+
 ## Dev environment scripts
 
 The package ships shell scripts for setting up and running a Symfony project locally.
@@ -54,3 +63,13 @@ composer recipes:install elkuku/symfony-utils
 ```
 
 Flex asks before overwriting scripts that already exist in `bin/`; add `--force` to replace them.
+
+## Development
+
+```shell
+composer install
+composer check   # PHPStan, PHP CS Fixer, PHPUnit
+shellcheck -x -P SCRIPTDIR resources/bin/*
+```
+
+CI runs these on every push and pull request, and lints `src/` with PHP 8.1, the lowest supported version.

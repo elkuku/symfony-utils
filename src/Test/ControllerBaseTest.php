@@ -1,17 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Elkuku\SymfonyUtils\Test;
 
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\Route;
-use UnexpectedValueException;
 
 /**
- * Controller "smoke" test
+ * Controller "smoke" test.
  */
 abstract class ControllerBaseTest extends WebTestCase
 {
@@ -46,26 +45,27 @@ abstract class ControllerBaseTest extends WebTestCase
             ->get('routing.loader');
 
         if (!$this->controllerRoot) {
-            throw new UnexpectedValueException(
-                'Please set a controllerRoot directory!'
-            );
+            throw new \UnexpectedValueException('Please set a controllerRoot directory!');
         }
 
-        $it = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->controllerRoot)
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->controllerRoot)
         );
 
         $it->rewind();
         while ($it->valid()) {
             if (!$it->isDot()
-                && !in_array($it->getSubPathName(), $this->ignoredFiles, true)
+                && !\in_array($it->getSubPathName(), $this->ignoredFiles, true)
             ) {
-                $sub = $it->getSubPath() ? $it->getSubPath() . '\\' : '';
+                $file = $it->current();
 
-                $routerClass = 'App\Controller\\' . $sub . basename(
-                        $it->key(),
-                        '.php'
-                    );
+                if (!$file instanceof \SplFileInfo) {
+                    throw new \UnexpectedValueException('Unexpected iterator value.');
+                }
+
+                $sub = $it->getSubPath() ? $it->getSubPath().'\\' : '';
+
+                $routerClass = 'App\Controller\\'.$sub.$file->getBasename('.php');
                 $routes = $routeLoader->load($routerClass)->all();
 
                 $this->processRoutes($routes, $client);
@@ -81,16 +81,15 @@ abstract class ControllerBaseTest extends WebTestCase
      * @param array<Route> $routes
      */
     private function processRoutes(
-        array         $routes,
+        array $routes,
         KernelBrowser $browser,
-    ): void
-    {
+    ): void {
         foreach ($routes as $routeName => $route) {
             $expectedStatusCodes = [];
-            $path = str_replace('{id}', '1', $route->getPath());
+            $path = \str_replace('{id}', '1', $route->getPath());
 
-            if (array_key_exists($routeName, $this->exceptions)) {
-                if (array_key_exists(
+            if (\array_key_exists($routeName, $this->exceptions)) {
+                if (\array_key_exists(
                     'statusCodes',
                     $this->exceptions[$routeName]
                 )
@@ -98,19 +97,18 @@ abstract class ControllerBaseTest extends WebTestCase
                     $expectedStatusCodes = $this->exceptions[$routeName]['statusCodes'];
                     $this->usedExceptions[$routeName]['statusCodes'] = $this->exceptions[$routeName]['statusCodes'];
                 }
-                if (array_key_exists(
+                if (\array_key_exists(
                     'params',
                     $this->exceptions[$routeName]
                 )
                 ) {
                     $this->usedExceptions[$routeName]['params'] = $this->exceptions[$routeName]['params'];
                     foreach (
-                        $this->exceptions[$routeName]['params'] as $param =>
-                        $paramReplacement
+                        $this->exceptions[$routeName]['params'] as $param => $paramReplacement
                     ) {
-                        $path = str_replace(
+                        $path = \str_replace(
                             $param,
-                            (string)$paramReplacement,
+                            (string) $paramReplacement,
                             $path
                         );
                     }
@@ -120,15 +118,15 @@ abstract class ControllerBaseTest extends WebTestCase
             $methods = $route->getMethods();
 
             if (!$methods) {
-                echo sprintf(
-                        'No methods set in controller "%s"',
-                        $route->getPath()
-                    ) . PHP_EOL;
+                echo \sprintf(
+                    'No methods set in controller "%s"',
+                    $route->getPath()
+                ).PHP_EOL;
                 $methods = ['GET'];
             }
 
             foreach ($methods as $method) {
-                $expectedStatusCode = array_key_exists(
+                $expectedStatusCode = \array_key_exists(
                     $method,
                     $expectedStatusCodes
                 ) ? $expectedStatusCodes[$method] : 302;
@@ -138,7 +136,7 @@ abstract class ControllerBaseTest extends WebTestCase
                 self::assertEquals(
                     $expectedStatusCode,
                     $browser->getResponse()->getStatusCode(),
-                    sprintf(
+                    \sprintf(
                         'failed: %s (%s) with method: %s',
                         $routeName,
                         $path,

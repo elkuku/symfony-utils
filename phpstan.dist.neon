@@ -1,0 +1,9 @@
+includes:
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+parameters:
+    level: 8
+    paths:
+        - src/
+        - tests/
+    # The package supports PHP 8.1, even though the dev tools need a newer PHP.
+    phpVersion: 80100
