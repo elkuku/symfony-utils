@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Deploy script: run it on the server, in the project folder, after updating the code.
+#
+# Installed by the elkuku/symfony-utils Flex recipe.
+#
+# Uses "php" and "composer" from the PATH. Override them for hosts with several PHP versions, e.g. Plesk:
+#   PHP_BIN=/opt/plesk/php/8.5/bin/php COMPOSER_BIN=/usr/lib/plesk-9.0/composer.phar bin/deploy
+# (Don't use COMPOSER for this: Composer reads that variable as the name of the composer.json file.)
+#
+# License: WTFPL
+# Author: Nikolai Plath
+#
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && cd .. && pwd)"
+cd "$DIR" || exit 1
+
+# Composer's post-install scripts (cache:clear) and the console must run in prod:
+# the dev-only bundles are gone after "composer install --no-dev".
+export APP_ENV=prod
+export APP_DEBUG=0
+
+PHP_BIN="${PHP_BIN:-php}"
+COMPOSER_BIN="${COMPOSER_BIN:-$(command -v composer)}"
+
+if [ -z "$COMPOSER_BIN" ]; then
+  echo "❌ ERROR: Composer could not be found. Set COMPOSER_BIN to its path."
+  exit 1
+fi
+
+function console {
+  "$PHP_BIN" bin/console "$@"
+}
+
+function hasConsoleCommand {
+  console list "$1" &> /dev/null
+}
+
+echo ">>>============================================================================="
+date
+
+echo "**** Installing composer dependencies ..."
+"$PHP_BIN" "$COMPOSER_BIN" install --no-dev --optimize-autoloader || exit 1
+
+echo "**** Creating prod env file ..."
+"$PHP_BIN" "$COMPOSER_BIN" dump-env prod || exit 1
+
+if hasConsoleCommand asset-map; then
+  echo "**** Compiling assets ..."
+  console asset-map:compile || exit 1
+fi
+
+if hasConsoleCommand doctrine:migrations; then
+  echo "**** Executing db migrations ..."
+  console doctrine:migrations:migrate -n --allow-no-migration || exit 1
+fi
+
+echo "<<<============================================================================="

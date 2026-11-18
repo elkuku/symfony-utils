@@ -10,12 +10,13 @@ A [Symfony Flex](https://symfony.com/doc/current/setup/flex.html) recipe copies 
 | `bin/install`      | `composer install`, starts the Docker Compose services, runs the Doctrine migrations, loads the fixtures on a fresh database, starts the Symfony server |
 | `bin/start`        | Starts the Docker Compose services and the Symfony server                                                                                                |
 | `bin/stop`         | Stops the Symfony server and the Docker Compose services                                                                                                 |
+| `bin/deploy`       | Runs on the server: `composer install --no-dev`, `dump-env prod`, compiles the assets, runs the Doctrine migrations. Set `PHP_BIN`/`COMPOSER_BIN` to use other binaries |
 | `bin/functions.sh` | Helpers used by the scripts above                                                                                                                        |
 
 Each step is skipped when the project doesn't use it (no `compose.yaml`, no Doctrine migrations, no fixtures).
 Fixtures are only loaded when no migration had been run before, because loading them purges the database.
 
-The scripts need the [Symfony CLI](https://symfony.com/download), and Docker with Compose v2 (`docker compose`) if the project has a Compose file.
+The local scripts need the [Symfony CLI](https://symfony.com/download), and Docker with Compose v2 (`docker compose`) if the project has a Compose file. `bin/deploy` only needs PHP and Composer.
 
 ### Installing the scripts
 
